@@ -8,7 +8,7 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using Project_PRN.Models;
-//Khar
+
 namespace Project_PRN.Controllers {
     public class BillsController : Controller {
         private ProjectPRNEntities3 db = new ProjectPRNEntities3();
@@ -36,6 +36,7 @@ namespace Project_PRN.Controllers {
             Bill bill = db.Bills.Find(id);
             if (bill == null) {
                 return HttpNotFound();
+                Console.WriteLine("Tu Vawn Kha");
             }
             return View(bill);
         }
