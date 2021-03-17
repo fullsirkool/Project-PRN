@@ -36,7 +36,6 @@ namespace Project_PRN.Controllers {
             Bill bill = db.Bills.Find(id);
             if (bill == null) {
                 return HttpNotFound();
-                Console.WriteLine("Tu Vawn Kha");
             }
             return View(bill);
         }
