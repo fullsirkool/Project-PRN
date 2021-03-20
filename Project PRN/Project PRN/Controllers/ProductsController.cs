@@ -148,7 +148,7 @@ namespace Project_PRN.Controllers {
                     controller = "Home",
                     action = "Index",
                     id = UrlParameter.Optional
-                });
+                });//s
             }
             return RedirectToAction("UploadProduct");
         }
