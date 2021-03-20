@@ -127,28 +127,49 @@ namespace Project_PRN.Controllers {
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "productID,title,author,description,shortDescription,image,price,quantity,sold,postTime,categoriesID,userID")] Product product, HttpPostedFileBase image) {
             if (ModelState.IsValid) {
-                product.userID = Int32.Parse(Session["user"].ToString());
-                product.postTime = DateTime.Now;
-                string imgPath = ConfigurationManager.ConnectionStrings["imagePath"].ToString();
-                try {
-                    if (image != null) {
-                        string path = Path.Combine(Server.MapPath($"~{imgPath}"), Path.GetFileName(image.FileName));
-                        image.SaveAs(path);
-                        product.image = image.FileName;
-                    }
-                    ViewBag.FileStatus = "File uploaded successfully.";
-                } catch (Exception) {
-                    a
-                    ViewBag.FileStatus = "Error while file uploading.";
+                if (Session["user"] == null)
+                {
+                    return RedirectToAction("SignIn", "Accounts");
                 }
+                else
+                {
+                    product.userID = Int32.Parse(Session["user"].ToString());
+                    product.postTime = DateTime.Now;
+                    string imgPath = ConfigurationManager.ConnectionStrings["imagePath"].ToString();
+                    try
+                    {
+                        if (image != null)
+                        {
+                            var allowedExtensions = new[] { ".Jpg", ".png", ".jpg", "jpeg" };
+                            var ext = Path.GetExtension(image.FileName);
+                            if (allowedExtensions.Contains(ext)) //check what type of extension  
+                            {
+                                string path = Path.Combine(Server.MapPath($"~{imgPath}"), Path.GetFileName(image.FileName));
+                                image.SaveAs(path);
+                                product.image = image.FileName;
+                            }
+                            else { return RedirectToAction("UploadProduct", "Products"); }
+                        }
+                        else
+                        {
+                            return RedirectToAction("UploadProduct", "Products");
+                        }
+                        ViewBag.FileStatus = "File uploaded successfully.";
+                    }
+                    catch (Exception)
+                    {
+                        ViewBag.FileStatus = "Error while file uploading.";
+                    }
 
-                db.Products.Add(product);
-                db.SaveChanges();
-                return RedirectToRoute(new {
-                    controller = "Home",
-                    action = "Index",
-                    id = UrlParameter.Optional
-                });
+                    db.Products.Add(product);
+                    db.SaveChanges();
+                    return RedirectToRoute(new
+                    {
+                        controller = "Home",
+                        action = "Index",
+                        id = UrlParameter.Optional
+                    });
+                }
             }
             return RedirectToAction("UploadProduct");
         }
