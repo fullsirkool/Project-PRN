@@ -169,7 +169,7 @@ namespace Project_PRN.Controllers {
                         action = "Index",
                         id = UrlParameter.Optional
                     });
-                }
+                }//s
             }
             return RedirectToAction("UploadProduct");
         }
