@@ -138,7 +138,7 @@ namespace Project_PRN.Controllers {
                     }
                     ViewBag.FileStatus = "File uploaded successfully.";
                 } catch (Exception) {
-
+                    a
                     ViewBag.FileStatus = "Error while file uploading.";
                 }
 
