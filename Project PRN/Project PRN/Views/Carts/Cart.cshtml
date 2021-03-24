@@ -68,11 +68,15 @@
                                 <td class="product-remove"><a href="#"><span class="ion-ios-close"></span></a></td>
 
                                 <td class="image-prod">
-                                    <img class="img" v-bind:src="p.Product.image" />
+                                    <a v-bind:href="'/Products/ProductDetail?productID=' + p.Product.productID">
+                                        <img class="img" v-bind:src="p.Product.image" />
+                                    </a>
                                 </td>
 
                                 <td class="product-name">
-                                    {{p.Product.title}}
+                                    <a v-bind:href="'/Products/ProductDetail?productID=' + p.Product.productID">
+                                        {{p.Product.title}}
+                                    </a>
                                 </td>
 
                                 <td class="price">{{p.Product.price}}</td>
