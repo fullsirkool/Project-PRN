@@ -61,9 +61,9 @@
                                 <th>Total</th>
                                 <th>Ordertime</th>
                                 <th>
-                                    <a v-if="order.status == 0" href="#" class="btn btn-danger link-active">CANCEL</a>
-                                    <a v-if="order.status == 2" class="btn btn-success link-active">Success</a>
-                                    <a v-if="order.status == 1" id="btnPending" class="btn btn-secondary ">Pending, Click to Cancel</a>
+                                    <a v-if="order.status == 0" class="btn btn-danger link-active">CANCELED</a>
+                                    <a v-if="order.status == 2" class="btn btn-success link-active">Successed</a>
+                                    <a v-if="order.status == 1" v-bind:href="'/Manager/ChangeStatus?sBillID=' + order.ID + '&sType=0'" id="btnPending" class="btn btn-secondary ">Pending - Click to Cancel</a>
                                 </th>
                             </tr>
                         </thead>
