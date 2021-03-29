@@ -8,16 +8,21 @@ using System.Net.Mail;
 using System.Web;
 using System.Web.Mvc;
 
-namespace Project_PRN.Controllers {
-    public class ManagerController : Controller {
+namespace Project_PRN.Controllers
+{
+    public class ManagerController : Controller
+    {
         private ProjectPRNEntities3 db = new ProjectPRNEntities3();
-        public ActionResult ContactManager() {
+        public ActionResult ContactManager()
+        {
             return View();
         }
 
-        public JsonResult ContactJson() {
+        public JsonResult ContactJson()
+        {
             db.Configuration.ProxyCreationEnabled = false;
-            List<Contact> contacts = db.Contacts.ToList().Select(contact => new Contact {
+            List<Contact> contacts = db.Contacts.ToList().Select(contact => new Contact
+            {
                 userid = contact.userid,
                 email = contact.email,
                 content = contact.content,
@@ -29,69 +34,99 @@ namespace Project_PRN.Controllers {
             }).Where(c => c.status == false).ToList();
             return Json(contacts, JsonRequestBehavior.AllowGet);
         }
-        public ActionResult AdminBillManager(int? type, DateTime? date) {
+        public ActionResult AdminBillManager(int? type, DateTime? date)
+        {
             db.Configuration.ProxyCreationEnabled = false;
-            if (Session["user"] == null) {
+            if (Session["user"] == null)
+            {
                 return RedirectToAction("SignIn", "Accounts");
-            } else {
+            }
+            else
+            {
                 int userID = Int32.Parse(Session["user"].ToString());
                 Account account = db.Accounts.Find(userID);
-                if (account.role == 1) {
-                    if(type != null) {
+                if (account.role == 1)
+                {
+                    if (type != null)
+                    {
                         ViewData["type"] = type;
-                    } else {
+                    }
+                    else
+                    {
                         ViewData["type"] = 1;
                     }
-                    if (date != null) {
+                    if (date != null)
+                    {
                         ViewData["date"] = date;
-                    } else {
+                    }
+                    else
+                    {
                         ViewData["date"] = DateTime.Now;
                     }
                     return View();
-                } else {
+                }
+                else
+                {
                     return RedirectToAction("Index", "Home");
                 }
             }
         }
 
-        public ActionResult StaffBillManager() {
+        public ActionResult StaffBillManager()
+        {
             db.Configuration.ProxyCreationEnabled = false;
-            if (Session["user"] == null) {
+            if (Session["user"] == null)
+            {
                 return RedirectToAction("SignIn", "Accounts");
-            } else {
+            }
+            else
+            {
                 int userID = Int32.Parse(Session["user"].ToString());
                 Account account = db.Accounts.Find(userID);
-                if (account.role == 3) {
+                if (account.role == 3)
+                {
                     return View();
-                } else {
+                }
+                else
+                {
                     return RedirectToAction("Index", "Home");
                 }
             }
         }
 
-        public ActionResult BillManager() {
+        public ActionResult BillManager()
+        {
             db.Configuration.ProxyCreationEnabled = false;
-            if (Session["user"] == null) {
+            if (Session["user"] == null)
+            {
                 return RedirectToAction("SignIn", "Accounts");
-            } else {
+            }
+            else
+            {
                 int userID = Int32.Parse(Session["user"].ToString());
                 Account account = db.Accounts.Find(userID);
-                if (account.role == 3 || account.role == 2) {
+                if (account.role == 3 || account.role == 2)
+                {
                     return View();
-                } else {
+                }
+                else
+                {
                     return RedirectToAction("Index", "Home");
                 }
             }
         }
 
-        public ActionResult ReplyContact(int? contactId) {
+        public ActionResult ReplyContact(int? contactId)
+        {
             ViewData["contactId"] = contactId;
             return View();
         }
 
-        public JsonResult GetContactByID(int? contactId) {
+        public JsonResult GetContactByID(int? contactId)
+        {
             db.Configuration.ProxyCreationEnabled = false;
-            Contact ct = db.Contacts.ToList().Select(contact => new Contact {
+            Contact ct = db.Contacts.ToList().Select(contact => new Contact
+            {
                 userid = contact.userid,
                 email = contact.email,
                 content = contact.content,
@@ -106,15 +141,19 @@ namespace Project_PRN.Controllers {
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult ReplyContact(string email, string subject, string content, int? contactId) {
-            try {
-                if (ModelState.IsValid) {
+        public ActionResult ReplyContact(string email, string subject, string content, int? contactId)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
                     MailAddress senderEmail = new MailAddress("pes2020testing@gmail.com", "BookStore");
                     MailAddress receiverEmail = new MailAddress(email, "Receiver");
                     string password = "pes2020test";
                     string sub = subject;
                     string body = content;
-                    SmtpClient smtp = new SmtpClient {
+                    SmtpClient smtp = new SmtpClient
+                    {
                         Host = "smtp.gmail.com",
                         Port = 587,
                         EnableSsl = true,
@@ -122,11 +161,13 @@ namespace Project_PRN.Controllers {
                         UseDefaultCredentials = false,
                         Credentials = new NetworkCredential(senderEmail.Address, password)
                     };
-                    using (MailMessage mess = new MailMessage(senderEmail, receiverEmail) {
+                    using (MailMessage mess = new MailMessage(senderEmail, receiverEmail)
+                    {
 
                         Subject = subject,
                         Body = body
-                    }) {
+                    })
+                    {
                         mess.IsBodyHtml = true;
                         smtp.Send(mess);
                     }
@@ -137,7 +178,9 @@ namespace Project_PRN.Controllers {
                     db.SaveChanges();
                 }
 
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 ViewBag.Message = "Some Error";
                 return View();
             }
@@ -162,25 +205,27 @@ namespace Project_PRN.Controllers {
                 }
                 catch
                 {
-                    return RedirectToRoute(new
-                    {
-                        controller = "Manager",
-                        action = "BillManager",
-                        id = UrlParameter.Optional
-                    });
+                    return null;
                 }
             }
             else if (sType.Equals("1"))
             {
-                long billId = Convert.ToInt64(sBillID);
-                List<Bill> bill = db.Bills.Where(b => b.BillID == billId).ToList();
-                foreach (Bill b in bill)
+                try
                 {
-                    b.status = 2;
-                    db.Entry(b).State = EntityState.Modified;
-                    db.SaveChanges();
+
+                    long billId = Convert.ToInt64(sBillID);
+                    List<Bill> bill = db.Bills.Where(b => b.BillID == billId).ToList();
+                    foreach (Bill b in bill)
+                    {
+                        b.status = 2;
+                        db.Entry(b).State = EntityState.Modified;
+                        db.SaveChanges();
+                    }
                 }
-                /*return RedirectToAction("StaffBillManager", new { billId = billId });*/
+                catch
+                {
+                    return null;
+                }
             }
             return null;
 
