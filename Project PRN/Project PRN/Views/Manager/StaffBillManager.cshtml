@@ -56,6 +56,21 @@
                         .catch(error => {
                             console.log(error)
                         })
+                },
+                changeStatus(billId) {
+                    axios.get('/Manager/ChangeStatus', {
+                        params: {
+                            sBillId: this.text,
+                            sType: "1"
+                        }
+                    })
+                        .then(response => {
+                            this.order = response.data
+                            console.log(response.data)
+                        })
+                        .catch(error => {
+                            console.log(error)
+                        })
                 }
             }
         })
@@ -96,7 +111,7 @@
                                 <th>
                                     <a v-if="order.status == 2" class="btn btn-success link-active">DELIVERY SUCCESS</a>
                                     <a v-if="order.status == 0" class="btn btn-danger link-active">CANCELED</a>
-                                    <a v-if="order.status == 1" class="btn btn-secondary">PENDING - Click to confirm success!</a>
+                                    <a v-if="order.status == 1" v-on:click="changeStatus(order.ID)" class="btn btn-secondary">PENDING - Click to confirm success!</a>
                                 </th>
                             </tr>
                         </thead>

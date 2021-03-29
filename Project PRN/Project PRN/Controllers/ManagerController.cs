@@ -143,5 +143,47 @@ namespace Project_PRN.Controllers {
             }
             return RedirectToAction("ContactManager");
         }
+
+        public ActionResult ChangeStatus(string sBillID, string sType)
+        {
+            if (sType.Equals("0"))
+            {
+                try
+                {
+                    long billId = Convert.ToInt64(sBillID);
+                    List<Bill> bill = db.Bills.Where(b => b.BillID == billId).ToList();
+                    foreach (Bill b in bill)
+                    {
+                        b.status = 0;
+                        db.Entry(b).State = EntityState.Modified;
+                        db.SaveChanges();
+                    }
+                    return RedirectToAction("BillManager");
+                }
+                catch
+                {
+                    return RedirectToRoute(new
+                    {
+                        controller = "Manager",
+                        action = "BillManager",
+                        id = UrlParameter.Optional
+                    });
+                }
+            }
+            else if (sType.Equals("1"))
+            {
+                long billId = Convert.ToInt64(sBillID);
+                List<Bill> bill = db.Bills.Where(b => b.BillID == billId).ToList();
+                foreach (Bill b in bill)
+                {
+                    b.status = 2;
+                    db.Entry(b).State = EntityState.Modified;
+                    db.SaveChanges();
+                }
+                /*return RedirectToAction("StaffBillManager", new { billId = billId });*/
+            }
+            return null;
+
+        }
     }
 }
