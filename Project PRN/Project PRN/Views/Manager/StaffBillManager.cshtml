@@ -57,6 +57,29 @@
                             console.log(error)
                         })
                 },
+                searchByIDHasParam(billID) {
+                    axios.get('/Bills/StaffBillManagerJson', {
+                        params: {
+                            billId: billID
+                        }
+                    })
+                        .then(response => {
+                            if (response.data.type == 1) {
+                                this.order = response.data
+                                console.log(response.data)
+                            } else {
+                                Swal.fire({
+                                    position: 'Center',
+                                    icon: 'error',
+                                    title: 'Oops...',
+                                    text: response.data.message,
+                                })
+                            }
+                        })
+                        .catch(error => {
+                            console.log(error)
+                        })
+                },
                 changeStatus(billId) {
                     axios.get('/Manager/ChangeStatus', {
                         params: {
@@ -67,10 +90,12 @@
                         .then(response => {
                             this.order = response.data
                             console.log(response.data)
+                            this.searchByIDHasParam(this.text)
                         })
                         .catch(error => {
                             console.log(error)
                         })
+                    
                 }
             }
         })
