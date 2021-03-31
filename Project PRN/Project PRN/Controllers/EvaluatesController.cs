@@ -15,11 +15,29 @@ namespace Project_PRN.Controllers
         private ProjectPRNEntities3 db = new ProjectPRNEntities3();
 
         // GET: Evaluates
-        public ActionResult Evaluate(int? productID)
+        public ActionResult Evaluate(int? productID, long? BillId)
         {
-            ViewData["productID"] = productID;
-            return View();
+            db.Configuration.ProxyCreationEnabled = false;
+            if (Session["user"] == null)
+            {
+                return RedirectToAction("SignIn", "Accounts");
+            }
+            else
+            {
+                Bill bill = db.Bills.Where(p => p.BillID == BillId - 2).FirstOrDefault();
+                if (bill.status == 2)
+                {
+                    ViewData["productID"] = productID;
+                    return View();
+                }
+                else
+                {
+                    return RedirectToAction("Index", "Home");
+                }
+            }
         }
+
+
 
         // GET: Evaluates/Details/5
         public ActionResult Details(int? id)
@@ -39,9 +57,14 @@ namespace Project_PRN.Controllers
         // GET: Evaluates/Create
         public ActionResult Create()
         {
-            ViewBag.userID = new SelectList(db.Accounts, "userID", "email");
-            ViewBag.productID = new SelectList(db.Products, "productID", "title");
-            return View();
+            if (Session["user"] != null)
+            {
+                return View();
+            }
+            else
+            {
+                return RedirectToAction("SignIn");
+            }
         }
 
         // POST: Evaluates/Create
@@ -51,16 +74,22 @@ namespace Project_PRN.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "evaluateID,evaluateContent,rate,date,userID,productID")] Evaluate evaluate)
         {
+            db.Configuration.ProxyCreationEnabled = false;
             if (ModelState.IsValid)
             {
+                evaluate.userID = Int32.Parse(Session["user"].ToString());
+                evaluate.date = DateTime.Now;
+
                 db.Evaluates.Add(evaluate);
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                return RedirectToRoute(new
+                {
+                    controller = "Home",
+                    action = "Index",
+                    id = UrlParameter.Optional
+                });
             }
-
-            ViewBag.userID = new SelectList(db.Accounts, "userID", "email", evaluate.userID);
-            ViewBag.productID = new SelectList(db.Products, "productID", "title", evaluate.productID);
-            return View(evaluate);
+            return RedirectToAction("Home");
         }
 
         // GET: Evaluates/Edit/5
