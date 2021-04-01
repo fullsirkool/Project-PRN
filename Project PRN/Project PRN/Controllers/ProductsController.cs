@@ -32,6 +32,23 @@ namespace Project_PRN.Controllers {
             return View();
         }
 
+
+        public JsonResult SearchAutocomplete(string keyword) {
+            db.Configuration.ProxyCreationEnabled = false;
+
+            List<Product> data = db.Products.ToList().Select(product => new Product {
+                productID = product.productID,
+                title = product.title,
+
+                image = product.fullImagePath(),
+
+
+            }).Where(p => p.title.ToLower().StartsWith(keyword.ToLower())).OrderBy(x => x.title).ToList();
+            return Json(new {
+                data = data,
+                status = true
+            }, JsonRequestBehavior.AllowGet);
+        }
         public JsonResult HomeProductJson() {
             db.Configuration.ProxyCreationEnabled = false;
             List<Product> listProduct = db.Products.ToList().Select(product => new Product {
@@ -47,6 +64,7 @@ namespace Project_PRN.Controllers {
                 postTime = product.postTime,
                 categoriesID = product.categoriesID,
                 userID = product.userID,
+                status = product.status,
                 rate = product.calculateRate(),
                 Account = db.Accounts.Find(product.userID),
                 Category = db.Categories.Find(product.categoriesID),
@@ -71,6 +89,7 @@ namespace Project_PRN.Controllers {
                 postTime = product.postTime,
                 categoriesID = product.categoriesID,
                 userID = product.userID,
+                status = product.status,
                 rate = product.calculateRate(),
                 Account = db.Accounts.Find(product.userID),
                 Category = db.Categories.Find(product.categoriesID),
@@ -106,6 +125,7 @@ namespace Project_PRN.Controllers {
                     postTime = product.postTime,
                     categoriesID = product.categoriesID,
                     userID = product.userID,
+                    status = product.status,
                     rate = product.calculateRate(),
                     Account = db.Accounts.Find(product.userID),
                     Category = db.Categories.Find(product.categoriesID),
@@ -132,13 +152,14 @@ namespace Project_PRN.Controllers {
                         postTime = product.postTime,
                         categoriesID = product.categoriesID,
                         userID = product.userID,
+                        status = product.status,
                         rate = product.calculateRate(),
                         Account = db.Accounts.Find(product.userID),
                         Category = db.Categories.Find(product.categoriesID),
                         Evaluates = db.Evaluates.Where(e => e.productID == product.productID).ToList()
 
-                    }).Where(s => s.title.ToLower().Contains(searchKey.ToLower())).OrderBy(product => product.postTime).ToPagedList(pageNumber, pageSize).ToList();
-                    totalPage = db.Products.Where(s => s.title.Contains(searchKey)).Count() / pageSize + 1;
+                    }).Where(s => s.title.ToLower().StartsWith(searchKey.ToLower())).OrderBy(product => product.title).ToPagedList(pageNumber, pageSize).ToList();
+                    totalPage = db.Products.Where(s => s.title.StartsWith(searchKey)).Count() / pageSize + 1;
                 }
 
             } else {
@@ -160,6 +181,7 @@ namespace Project_PRN.Controllers {
                     postTime = product.postTime,
                     categoriesID = product.categoriesID,
                     userID = product.userID,
+                    status = product.status,
                     rate = product.calculateRate(),
                     Account = db.Accounts.Find(product.userID),
                     Category = db.Categories.Find(product.categoriesID),
@@ -185,12 +207,13 @@ namespace Project_PRN.Controllers {
                         postTime = product.postTime,
                         categoriesID = product.categoriesID,
                         userID = product.userID,
+                        status = product.status,
                         rate = product.calculateRate(),
                         Account = db.Accounts.Find(product.userID),
                         Category = db.Categories.Find(product.categoriesID),
                         Evaluates = db.Evaluates.Where(e => e.productID == product.productID).ToList()
 
-                    }).Where(s => s.categoriesID == categoryID && s.title.ToLower().StartsWith(searchKey.ToLower())).OrderBy(product => product.postTime).ToPagedList(pageNumber, pageSize).ToList();
+                    }).Where(s => s.categoriesID == categoryID && s.title.ToLower().StartsWith(searchKey.ToLower())).OrderBy(product => product.title).ToPagedList(pageNumber, pageSize).ToList();
                     totalPage = db.Products.Where(s => s.categoriesID == categoryID && s.title.ToLower().StartsWith(searchKey.ToLower())).Count() / pageSize + 1;
 
                 }
@@ -219,15 +242,13 @@ namespace Project_PRN.Controllers {
             }
         }
 
-        // POST: Products/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "productID,title,author,description,shortDescription,image,price,quantity,sold,postTime,categoriesID,userID")] Product product, HttpPostedFileBase image) {
             if (ModelState.IsValid) {
                 product.userID = Int32.Parse(Session["user"].ToString());
                 product.postTime = DateTime.Now;
+                product.status = true;
                 string imgPath = ConfigurationManager.ConnectionStrings["imagePath"].ToString();
                 try {
                     if (image != null) {
@@ -246,7 +267,6 @@ namespace Project_PRN.Controllers {
                 } catch (Exception) {
 
                 }
-
                 db.Products.Add(product);
                 db.SaveChanges();
                 return RedirectToRoute(new {
@@ -278,6 +298,7 @@ namespace Project_PRN.Controllers {
                 postTime = product.postTime,
                 categoriesID = product.categoriesID,
                 userID = product.userID,
+                status = product.status,
                 rate = product.calculateRate(),
                 Account = db.Accounts.Find(product.userID),
                 Category = db.Categories.Find(product.categoriesID),
