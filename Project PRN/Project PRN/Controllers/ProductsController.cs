@@ -330,7 +330,6 @@ namespace Project_PRN.Controllers
 
         public JsonResult ProductDetailJson(int? productID)
         {
-
             db.Configuration.ProxyCreationEnabled = false;
             Product products = db.Products.ToList().Select(product => new Product
             {
@@ -370,69 +369,56 @@ namespace Project_PRN.Controllers
         }
         public ActionResult Edit(int? productId)
         {
-            if (Session["user"] != null)
+            db.Configuration.ProxyCreationEnabled = false;
+            ViewData["productId"] = productId;
+
+            if (Session["user"] == null)
             {
-                return View();
+                return RedirectToAction("SignIn", "Accounts");
             }
             else
             {
-                return RedirectToAction("SignIn");
+                int userID = Int32.Parse(Session["user"].ToString());
+                Account account = db.Accounts.Find(userID);
+                if (account.role == 3 || account.role == 1)
+                {
+                    return View();
+                }
+                else
+                {
+                    return RedirectToAction("Index", "Home");
+                }
             }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "productID,title,author,description,shortDescription,price,quantity,sold,postTime,userID,status")] Product product, HttpPostedFileBase image)
+        public ActionResult Edit([Bind(Include = "productID,description,shortDescription,price,quantity,status")] Product product)
         {
-            if (ModelState.IsValid)
+            try
             {
                 db.Configuration.ProxyCreationEnabled = false;
-                var userId = Int32.Parse(Session["user"].ToString());
                 int id = product.productID;
                 // List<Product> list = db.Products.Where(a => a.productID == id).ToList();
 
                 Product ProductUpdated = db.Products.Find(id);
-                ProductUpdated.productID = id;
-                ProductUpdated.title = product.title;
-                ProductUpdated.author = product.author;
                 ProductUpdated.description = product.description;
                 ProductUpdated.shortDescription = product.shortDescription;
-                string imgPath = ConfigurationManager.ConnectionStrings["imagePath"].ToString();
-                if (image != null)
-                {
-                    var allowedExtensions = new[] { ".Jpg", ".png", ".jpg", "jpeg" };
-                    var ext = Path.GetExtension(image.FileName);
-                    if (allowedExtensions.Contains(ext)) //check what type of extension  
-                    {
-                        string path = Path.Combine(Server.MapPath($"~{imgPath}"), Path.GetFileName(image.FileName));
-                        image.SaveAs(path);
-                        ProductUpdated.image = image.FileName;
-                    }
-                    else { return RedirectToAction("Edit", "Products"); }
-                }
-                else
-                {
-                    return RedirectToAction("Edit", "Products");
-                }
                 ProductUpdated.price = product.price;
                 ProductUpdated.quantity = product.quantity;
-                ProductUpdated.sold = product.sold;
-                ProductUpdated.postTime = DateTime.Now;
-                ProductUpdated.categoriesID = product.categoriesID;
-                ProductUpdated.userID = product.userID;
                 ProductUpdated.status = product.status;
 
                 db.Entry(ProductUpdated).State = EntityState.Modified;
                 db.SaveChanges();
-                return RedirectToRoute(new
-                {
-                    controller = "Home",
-                    action = "Index",
-                    id = UrlParameter.Optional
-                });
+                return RedirectToAction("Product", "Products");
+            }
+            catch
+            {
+                ViewData["productId"] = product.productID;
+                return RedirectToAction("Edit", "Products");
 
             }
-            return View(product);
+
         }
         public JsonResult GetCategoriesJson()
         {
